@@ -1,0 +1,16 @@
+# Lune SOTA v1.0
+
+## 2.1 Executive Summary & Hardware Physics
+  To emulate natural human conversation, LUNE must adhere to a strict latency boundary. Natural human turn-taking occurs within 200ms to 500ms, with psychological discomfort (awkward silence) initiating after 600ms. Therefore, 500ms is our absolute maximum latency target. Furthermore, to ensure cost-effective iteration before scaling to cloud infrastructure, the initial architecture and model fine-tuning must be strictly constrained to operate on a local 4GB VRAM GPU.
+
+## 2.2 Acoustic Input & Voice Activity Detection (VAD)
+  A 16kHz sampling rate is utilised to capture clear, natural-sounding phonetics, as frequencies below 8kHz degrade into unintelligible mumbling. To prevent premature interruptions that increase the user's stress, we implement Silero VAD paired with semantic heuristics. This allows the system to accurately distinguish between mid-sentence cognitive pauses ("thinking time") and true semantic endpoints.
+
+## 2.3 Speech-to-Text (STT) & Phonetic Extraction
+  To strictly preserve the local 4GB VRAM for the core cognitive engine and ensure compatibility with resource-constrained edge devices, LUNE offloads transcription to a Cloud STT API via continuous WebSocket streaming. Furthermore, rather than deploying a secondary, compute-heavy phonetic model, the system leverages the word-level JSON confidence scores generated natively by the STT API. Any word falling below a predefined confidence threshold is programmatically classified as a mispronunciation or mumble, instantly triggering a targeted pedagogical intervention.
+
+## 2.4 Cognitive Orchestration & Memory (The Brain)
+  To orchestrate multimodal streams concurrently without blocking the main execution thread, LUNE employs an asynchronous backend architecture. For memory management, the system avoids mid-conversation latency spikes and context-window overflow through proactive state flushing. Rather than summarising data during active speech, the orchestrator tracks token limits and injects hidden control states. A <save> token triggers a conversational pause, allowing the system to asynchronously flush salient facts to a lightweight Vector Database before seamlessly resuming the dialogue. Conversely, an <end> sequence signifies session termination, ensuring the LLM clears its short-term VRAM buffer while retaining distilled long-term knowledge for future interactions.
+
+## 2.5 Multimodal Output (TTS & Visemes)
+  To maintain the strict latency constraints without compromising the pedagogical quality of the generated voice, LUNE employs Semantic Output Chunking. Text tokens are buffered and flushed to the Text-to-Speech (TTS) engine at syntactic boundaries (e.g., commas, full stops) rather than sequentially, thereby preserving natural human prosody and intonation. Concurrently, the visual pipeline circumvents heavy video rendering entirely. Instead of generating new pixel frames, a localized neural network maps the audio frequencies directly to visemes, manipulating the existing geometry (blendshapes) of a static 3D model in the browser. This guarantees flawless lip synchronization while maintaining a near-zero VRAM footprint.
