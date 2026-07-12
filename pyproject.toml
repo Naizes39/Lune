@@ -1,0 +1,28 @@
+[project]
+name = "lune"
+version = "0.1.0"
+description = "Everyday AI Asistant"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.139.0",
+    "google-genai>=2.10.0",
+    "httpx>=0.28.1",
+    "motor>=3.7.1",
+    "ollama>=0.6.2",
+    "openai>=2.44.0",
+    "pydantic>=2.13.4",
+    "redis>=8.0.1",
+    "uvicorn>=0.50.0",
+]
+
+[dependency-groups]
+dev = []
+lint = [
+    "mypy>=2.1.0",
+    "ruff>=0.15.20",
+]
+test = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
